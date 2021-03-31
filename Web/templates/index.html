@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Machine Learning Projects</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+        integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+</head>
+
+<body class="">
+
+
+     <!-- Prediction modal -->
+     <div class="modal" tabindex="-1" role="dialog" id="prediction_modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Prediction</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h3 class="d-flex flex-row justify-content-center mt-5" id="prediction">
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Main page -->
+    <div class="container-fluid" id="main_page" style="height: 980px;">
+        <h3 class="d-flex flex-row justify-content-center mt-5" style="display: none;" id="prediction">
+
+        </h3>
+        <div class="card ml m-auto" style="width: 35rem; cursor: pointer;" id="gender_audio">
+            <img class="card-img-top" src="https://scx2.b-cdn.net/gfx/news/hires/2018/gender.jpg" alt="Card image cap">
+            <div class="card-body">
+                <h5 class="card-text text-center">Gender Classification</h5>
+            </div>
+            <div class="card-footer">
+                <div class="container">
+                    <div class="row text-center">
+                        <div class="col col-lg-6"><a href="#" target="blank"><i
+                                    class="fab fa-github fa-2x"></i></a></div>
+                        <div class="col col-lg-6"><a href="http://www.openslr.org/12/" target="blank"><i
+                                    class="fas fa-table fa-2x"></i></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gender Classification modal -->
+    <div class="modal" tabindex="-1" role="dialog" id="gender_modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gender Classification</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <div class="custom-file">
+                            <button class="form-control mx-1" style="cursor: pointer;" id="recordButton">Record</button>
+                            <button class="form-control mx-1 btn-danger" style="cursor: not-allowed;" disabled
+                                id="stopButton">Stop Record</button>
+                            <button class="form-control mx-1 btn-warning" style="cursor: not-allowed;" disabled
+                                id="pauseButton">Pause</button>
+                        </div>
+
+                    </div>
+                    <div class="">
+                        <p id="is_rec"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="predict_gender" disabled style="cursor: not-allowed;" class="btn btn-primary">Predeict</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+    <script>
+
+        $(".ml").click(function () {
+            var n = $(this).attr("id");
+            $("#gender_modal").modal("show")
+        });
+
+
+        $("#predict_gender").click(function () {
+            var formData = new FormData();
+            formData.append('audio_file', blob);
+            $.LoadingOverlay("show");
+            $.ajax({
+                url: "https://hw3-machine-learning.herokuapp.com/gender_prediction",
+                type: "POST",
+                dataType: "JSON",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (n) {
+                    var a = n.data;
+                    var pred = '';
+                    if (n.data == '1') pred = 'Male'
+                    else pred = 'Female'
+                    $('#gender_modal').modal('hide');
+                    setTimeout(function () {
+                        $.LoadingOverlay("hide");
+                        $('#prediction_modal').modal('show');
+                        $("#prediction").text(" ");
+                        $("#prediction").append("Gender is <span class='text-danger'> &#8203; " + pred + " &#8203;</span> ");
+                    }, 500)
+                },
+                error: function (n) {
+                    console.log(n);
+                }
+            })
+        });
+
+        $("#predict_gender").click(function () {
+            var formData = new FormData();
+            // formData.append('audio_file', $('#audio_file')[0].files[0]);
+            formData.append('audio_file', blob);
+            $.ajax({
+                url: "http://127.0.0.1:5000/gender_prediction",
+                type: "POST",
+                dataType: "JSON",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (n) {
+                    var a = n.data;
+                    var pred = '';
+                    if (n.data == '1') pred = 'Male'
+                    else pred = 'Female'
+                    $('#gender_modal').modal('hide');
+
+                    $.LoadingOverlay("hide");
+                    $('#prediction_modal').modal('show');
+                    $("#prediction").text(" ");
+                    $("#prediction").append("Gender is <span class='text-danger'> &#8203; " + pred + " &#8203;</span> ");
+                    
+                },
+                error: function (n) {
+                    console.log(n)
+                }
+            })
+        });
+    </script>
+
+
+    <script>
+        var blob = null;
+        //webkitURL is deprecated but nevertheless
+        URL = window.URL || window.webkitURL;
+
+        var gumStream; //stream from getUserMedia()
+        var rec; //Recorder.js object
+        var input; //MediaStreamAudioSourceNode we'll be recording
+
+        // shim for AudioContext when it's not avb. 
+        var AudioContext = window.AudioContext || window.webkitAudioContext;
+        var audioContext //audio context to help us record
+
+        var recordButton = document.getElementById("recordButton");
+        var stopButton = document.getElementById("stopButton");
+        var pauseButton = document.getElementById("pauseButton");
+
+        //add events to those 2 buttons
+        recordButton.addEventListener("click", startRecording);
+        stopButton.addEventListener("click", stopRecording);
+        pauseButton.addEventListener("click", pauseRecording);
+
+        function startRecording() {
+
+            /*
+                Simple constraints object, for more advanced audio features see
+                https://addpipe.com/blog/audio-constraints-getusermedia/
+            */
+
+            var constraints = {
+                audio: true,
+                video: false
+            }
+
+            /*
+            Disable the record button until we get a success or fail from getUserMedia() 
+        */
+
+
+
+            /*
+            We're using the standard promise based getUserMedia() 
+            https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+        */
+            var currently_recording = false;
+            navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+                console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
+
+                /*
+                    create an audio context after getUserMedia is called
+                    sampleRate might change after getUserMedia is called, like it does on macOS when recording through AirPods
+                    the sampleRate defaults to the one set in your OS for your playback device
+                */
+                audioContext = new AudioContext();
+
+                //update the format 
+                // document.getElementById("formats").innerHTML = "Format: 1 channel pcm @ " + audioContext.sampleRate / 1000 + "kHz"
+
+                /*  assign to gumStream for later use  */
+                gumStream = stream;
+
+                /* use the stream */
+                input = audioContext.createMediaStreamSource(stream);
+
+                /* 
+                    Create the Recorder object and configure to record mono sound (1 channel)
+                    Recording 2 channels  will double the file size
+                */
+                rec = new Recorder(input, {
+                    numChannels: 1
+                })
+
+
+                recordButton.disabled = true;
+                recordButton.style.cursor = "not-allowed";
+                stopButton.disabled = false;
+                stopButton.style.cursor = "pointer";
+                pauseButton.disabled = false;
+                pauseButton.style.cursor = "pointer";
+
+
+                //start the recording process
+                rec.record()
+
+                console.log("Recording started");
+                $('#is_rec').text('Recording...');
+                currently_recording = true;
+            }).catch(function(err) {
+                //enable the record button if getUserMedia() fails
+
+                if (!currently_recording) {
+                    recordButton.disabled = false;
+                    stopButton.disabled = true;
+                    pauseButton.disabled = true
+                }
+            });
+        }
+
+        function pauseRecording() {
+            console.log("pauseButton clicked rec.recording=", rec.recording);
+            if (rec.recording) {
+                //pause
+                rec.stop();
+                pauseButton.innerHTML = "Resume";
+                $('#is_rec').text('Recording is paused');
+            } else {
+                //resume
+                rec.record()
+                pauseButton.innerHTML = "Pause";
+                $('#is_rec').text('Recording...');
+            }
+        }
+
+        function stopRecording() {
+            console.log("stopButton clicked");
+            $('#predict_gender').attr('disabled', false);
+            $('#predict_gender').css('cursor', 'pointer');
+            $('#is_rec').text('Recording stopped');
+
+            //disable the stop button, enable the record too allow for new recordings
+            recordButton.disabled = false;
+            recordButton.style.cursor = "pointer";
+            stopButton.disabled = true;
+            stopButton.style.cursor = "not-allowed";
+            pauseButton.disabled = true;
+            pauseButton.style.cursor = "not-allowed";
+
+            //reset button just in case the recording is stopped while paused
+            pauseButton.innerHTML = "Pause";
+
+            //tell the recorder to stop the recording
+            rec.stop();
+
+            //stop microphone access
+            gumStream.getAudioTracks()[0].stop();
+
+            //create the wav blob and pass it on to createDownloadLink
+
+            rec.exportWAV(createDownloadLink);
+
+
+        }
+
+        function createDownloadLink(blob) {
+            this.blob = blob;
+        }
+    </script>
+</body>
+
+</html>
